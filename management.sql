@@ -7,7 +7,7 @@ use management;
 
 
 -- table1
-CREATE TABLE Customers (
+CREATE TABLE Customers1 (
     customer_id INT PRIMARY KEY AUTO_INCREMENT,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE Customers (
 );
 
 
-INSERT INTO Customers (first_name, last_name, address, city, state, zip_code, phone_number, email)
+INSERT INTO Customers1 (first_name, last_name, address, city, state, zip_code, phone_number, email)
 VALUES 
 ('John', 'Doe', '123 Elm St', 'theni', 'tn', '62701', '2345678908', 'john.doe@example.com'),
 ('Jane', 'Smith', '456 Oak St', 'madurai', 'tn', '62702', '9976567149', 'jane.smith@example.com'),
@@ -116,9 +116,9 @@ CREATE TABLE Bills (
 
 INSERT INTO Bills (account_id, billing_period_start, billing_period_end, total_amount, due_date, bill_status)
 VALUES 
-(8, '2023-01-01', '2023-01-31', 42.09, '2023-02-05', 'Unpaid'),
-(9, '2023-02-01', '2023-02-28', 32.46, '2023-03-05', 'Paid'),
-(10, '2023-02-01', '2023-02-28', 48.00, '2023-03-05', 'Unpaid');
+(1, '2023-01-01', '2023-01-31', 42.09, '2023-02-05', 'Unpaid'),
+(2, '2023-02-01', '2023-02-28', 32.46, '2023-03-05', 'Paid'),
+(3, '2023-02-01', '2023-02-28', 48.00, '2023-03-05', 'Unpaid');
 
 select * from bills;
 
@@ -135,9 +135,9 @@ CREATE TABLE Payments (
 
 INSERT INTO Payments (bill_id, payment_date, payment_amount, payment_method)
 VALUES 
-(7, '2023-02-20', 32.46, 'Credit Card'),
-(8, '2023-03-21', 40.43, 'Credit Card'),
-(9, '2024-05-21', 50.00, 'Cash');
+(4, '2023-02-20', 32.46, 'Credit Card'),
+(5, '2023-03-21', 40.43, 'Credit Card'),
+(6, '2024-05-21', 50.00, 'Cash');
 
 select * from Payments;
 
@@ -152,9 +152,9 @@ CREATE TABLE Tariffs (
 
 INSERT INTO Tariffs (account_id, tariff_type, start_date)
 VALUES 
-(8, 'Residential', '2023-01-01'),
-(9, 'Commercial', '2023-02-01'),
-(10, 'Residential', '2023-03-01');
+(1, 'Residential', '2023-01-01'),
+(2, 'Commercial', '2023-02-01'),
+(3, 'Residential', '2023-03-01');
 
 
 select * from Tariffs;
@@ -172,9 +172,9 @@ CREATE TABLE Notifications (
 
 INSERT INTO Notifications (account_id, notification_date, notification_type, message_content)
 VALUES 
-(8, '2023-02-01', 'Bill Reminder', 'Your bill is due on 2023-02-05.'),
-(9, '2023-03-01', 'Payment Confirmation', 'Your payment has been received.'),
-(10, '2023-03-15', 'Service Interruption', 'Your service has been temporarily suspended.');
+(4, '2023-02-01', 'Bill Reminder', 'Your bill is due on 2023-02-05.'),
+(5, '2023-03-01', 'Payment Confirmation', 'Your payment has been received.'),
+(6, '2023-03-15', 'Service Interruption', 'Your service has been temporarily suspended.');
 
 select * from Notifications;
 
@@ -182,6 +182,7 @@ select * from Notifications;
 select count(*) from Customers;
 
 -- joins
+
 -- inner join
 SELECT 
     c.customer_id,
@@ -207,6 +208,7 @@ select * from notifications cross join payments;
 
 --- where
 
+
 select * from customers
 where first_name like'a%';
 
@@ -214,22 +216,72 @@ where first_name like'a%';
 
 --- having
 
+
 select count(customer_id),city
 from customers
 group by city
 having count(customer_id)<5;
 
 
+-- store procedures
+
+-- procedure 01
+
+ 
+/*CREATE DEFINER=`root`@`localhost` PROCEDURE `GetPaymentHistory`(IN customerID INT)
+BEGIN
+    SELECT p.payment_id, p.payment_date, p.payment_amount, p.payment_method
+    FROM Payments p
+    JOIN Bills b ON p.bill_id = b.bill_id
+    JOIN Accounts a ON b.account_id = a.account_id
+    WHERE a.customer_id = customerID;
+END*/ 
 
 
+CALL GetPaymentHistory(1);
+
+-- store procedure 02
+
+/*CREATE DEFINER=`root`@`localhost` PROCEDURE `GetCustomerBillingInfo`(IN customerID INT)
+BEGIN
+    SELECT b.bill_id, b.billing_period_start, b.billing_period_end, b.total_amount, b.due_date, b.bill_status
+    FROM Bills b
+    JOIN Accounts a ON b.account_id = a.account_id
+    WHERE a.customer_id = customerID;
+END*/
+
+CALL GetCustomerBillingInfo(4);
+
+-- store procedure 03
 
 
+/*CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateBillStatus`(
+    IN billID INT,
+    IN newStatus ENUM('Paid', 'Unpaid', 'Overdue')
+)
+BEGIN
+    UPDATE Bills
+    SET bill_status = newStatus
+    WHERE bill_id = billID;
+END*/
 
 
+CALL UpdateBillStatus(1, 'Paid');
+
+--- store procdure 04
+
+/*CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateBillStatus`(
+    IN billID INT,
+    IN newStatus ENUM('Paid', 'Unpaid', 'Overdue')
+)
+BEGIN
+    UPDATE Bills
+    SET bill_status = newStatus
+    WHERE bill_id = billID;
+END*/
 
 
-
-
+call inprocedure();
 
 
 
